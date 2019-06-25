@@ -1,2 +1,2 @@
 # ElevioArticlesApi
-Simple articles api using elexir for Elev.io
+Simple articles api using Elixir for app.elev.io
