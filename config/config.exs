@@ -3,6 +3,6 @@
 use Mix.Config
 
 config :server,
-       port: System.get_env("port") || 8888,
+       port: 8881,
        api_key: System.get_env("api_key") || "",
        token: System.get_env("token") || ""
