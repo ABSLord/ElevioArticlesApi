@@ -4,10 +4,9 @@ defmodule Server.Router do
   use Application
   require Logger
   require HTTPoison
+
   plug(Plug.Logger, log: :debug)
-
   plug(:match)
-
   plug(:dispatch)
 
   @api_url "https://api.elev.io/v1"
@@ -23,18 +22,23 @@ defmodule Server.Router do
     @api_url <> "/articles?page=#{page_num}&page_size=#{page_size}"
     |> HTTPoison.get(@headers, options: %{page: page_num, page_size: page_size})
     |> case do
-         {:ok, %{body: data, status_code: code}} -> #send_resp(conn, code, data)
-            if keyword do
-              parse_data = Poison.decode!(data)
-              result = Enum.filter(parse_data["articles"], fn(article) ->
-                Enum.member?(article["keywords"], keyword)
-              end)
-              #IO.inspect parse_data
-              send_resp(conn, code, Poison.encode!(result))
-            else
-              send_resp(conn, code, data)
-            end
-         _ -> send_resp(conn, 400, "Unknown error")
+         {:ok, %{body: data, status_code: 200}} ->
+           case keyword do
+             nil ->
+               send_resp(conn, 200, data)
+             _ ->
+               parse_data = Poison.decode!(data)
+               result = Enum.filter(parse_data["articles"], fn(article) ->
+                 Enum.member?(article["keywords"], keyword)
+               end)
+               send_resp(conn, 200, Poison.encode!(result))
+           end
+
+         {:ok, %{body: data, status_code: code}} ->
+           send_resp(conn, code, data)
+
+         _ ->
+           send_resp(conn, 400, "Unknown error")
        end
   end
 
@@ -42,15 +46,16 @@ defmodule Server.Router do
     @api_url <> "/articles/" <> id
     |> HTTPoison.get(@headers)
     |> case do
-         {:ok, %{body: data, status_code: code}} -> send_resp(conn, code, data)
-         _ -> send_resp(conn, "400", "Unknown error")
+         {:ok, %{body: data, status_code: code}} ->
+           send_resp(conn, code, data)
+
+         _ ->
+           send_resp(conn, "400", "Unknown error")
        end
   end
 
   match _ do
-
     send_resp(conn, 404, "not found")
-
   end
 
 end
