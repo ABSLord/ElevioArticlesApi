@@ -1,0 +1,9 @@
+version: "3"
+services:
+  elevio-test-server:
+    image: elevio-test
+    ports:
+      - 8881:8881
+    environment:
+      - api_key=${API_KEY}
+      - token=${TOKEN}
